@@ -11,4 +11,11 @@
 Laravel 5.7 continues the improvements made in Laravel 5.6 by introducing Laravel Nova, optional email verification to the authentication scaffolding, support for guest users in authorization gates and policies, console testing improvements, Symfony dump-server integration, localizable notifications, and a variety of other bug fixes and usability improvements.
 
 
-## Larvel 5.7 framework use for building a products manager system with auth login to operate crud application 
+## About 
+Larvel 5.7 framework use for building a products manager system with auth login to operate crud application
+
+## Features 
+1. Basic CRUD operation.
+2. Login with auth and password hashed.
+3. Laravel new features in directory structure for blade file.
+4. Using of v5.7 controller, model, route, bootstrap 4 and blade
