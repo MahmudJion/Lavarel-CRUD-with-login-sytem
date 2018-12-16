@@ -22,8 +22,8 @@ Larvel 5.7 framework use for building a products manager system with auth login 
 
 ## How to run
 
-*git clone https://github.com/Quintus34/Lavarel-5.7-CRUD-with-login-sytem
-*cd project directory
-*composer install
-*php artisan migrate
-*php artisan serve
+* git clone https://github.com/Quintus34/Lavarel-5.7-CRUD-with-login-sytem
+* cd project directory
+* composer install
+* php artisan migrate
+* php artisan serve
