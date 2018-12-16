@@ -7,62 +7,101 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/license.svg" alt="License"></a>
 </p>
 
-## About Laravel
+## Laravel 5.7
+Laravel 5.7 continues the improvements made in Laravel 5.6 by introducing Laravel Nova, optional email verification to the authentication scaffolding, support for guest users in authorization gates and policies, console testing improvements, Symfony dump-server integration, localizable notifications, and a variety of other bug fixes and usability improvements.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel attempts to take the pain out of development by easing common tasks used in the majority of web projects, such as:
+## Laravel Nova
+Laravel Nova is a beautiful, best-in-class administration dashboard for Laravel applications. Of course, the primary feature of Nova is the ability to administer your underlying database records using Eloquent. Additionally, Nova offers support for filters, lenses, actions, queued actions, metrics, authorization, custom tools, custom cards, custom fields, and more.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+To learn more about Laravel Nova, check out the Nova website.
 
-Laravel is accessible, yet powerful, providing tools needed for large, robust applications.
+## Email Verification
+Laravel 5.7 introduces optional email verification to the authentication scaffolding included with the framework. To accommodate this feature, an email_verified_at timestamp column has been added to the default users table migration that is included with the framework.
 
-## Learning Laravel
+To prompt newly registered users to verify their email, the User model should be marked with the MustVerifyEmail interface:
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of any modern web application framework, making it a breeze to get started learning the framework.
+<?php
 
-If you're not in the mood to read, [Laracasts](https://laracasts.com) contains over 1100 video tutorials on a range of topics including Laravel, modern PHP, unit testing, JavaScript, and more. Boost the skill level of yourself and your entire team by digging into our comprehensive video library.
+namespace App;
 
-## Laravel Sponsors
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
-We would like to extend our thanks to the following sponsors for helping fund on-going Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell):
+class User extends Authenticatable implements MustVerifyEmail
+{
+    // ...
+}
+Once the User model is marked with the MustVerifyEmail interface, newly registered users will receive an email containing a signed verification link. Once this link has been clicked, Laravel will automatically record the verification time in the database and redirect users to a location of your choosing.
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[British Software Development](https://www.britishsoftware.co)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- [UserInsights](https://userinsights.com)
-- [Fragrantica](https://www.fragrantica.com)
-- [SOFTonSOFA](https://softonsofa.com/)
-- [User10](https://user10.com)
-- [Soumettre.fr](https://soumettre.fr/)
-- [CodeBrisk](https://codebrisk.com)
-- [1Forge](https://1forge.com)
-- [TECPRESSO](https://tecpresso.co.jp/)
-- [Runtime Converter](http://runtimeconverter.com/)
-- [WebL'Agence](https://weblagence.com/)
-- [Invoice Ninja](https://www.invoiceninja.com)
-- [iMi digital](https://www.imi-digital.de/)
-- [Earthlink](https://www.earthlink.ro/)
-- [Steadfast Collective](https://steadfastcollective.com/)
-- [We Are The Robots Inc.](https://watr.mx/)
-- [Understand.io](https://www.understand.io/)
+A verified middleware has been added to the default application's HTTP kernel. This middleware may be attached to routes that should only allow verified users:
 
-## Contributing
+'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+To learn more about email verification, check out the complete documentation.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Guest User Gates / Policies
+In previous versions of Laravel, authorization gates and policies automatically returned false for unauthenticated visitors to your application. However, you may now allow guests to pass through authorization checks by declaring an "optional" type-hint or supplying a null default value for the user argument definition:
 
-## Security Vulnerabilities
+Gate::define('update-post', function (?User $user, Post $post) {
+    // ...
+});
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Symfony Dump Server
+Laravel 5.7 offers integration with Symfony's dump-server command via a package by Marcel Pociot. To get started, run the dump-server Artisan command:
 
-## License
+php artisan dump-server
+Once the server has started, all calls to dump will be displayed in the dump-server console window instead of in your browser, allowing you to inspect the values without mangling your HTTP response output.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Notification Localization
+Laravel now allows you to send notifications in a locale other than the current language, and will even remember this locale if the notification is queued.
+
+To accomplish this, the Illuminate\Notifications\Notification class now offers a locale method to set the desired language. The application will change into this locale when the notification is being formatted and then revert back to the previous locale when formatting is complete:
+
+$user->notify((new InvoicePaid($invoice))->locale('es'));
+Localization of multiple notifiable entries may also be achieved via the Notification facade:
+
+Notification::locale('es')->send($users, new InvoicePaid($invoice));
+Console Testing
+Laravel 5.7 allows you to easily "mock" user input for your console commands using the  expectsQuestion method. In addition, you may specify the exit code and text that you expect to be output by the console command using the assertExitCode and expectsOutput methods. For example, consider the following console command:
+
+Artisan::command('question', function () {
+    $name = $this->ask('What is your name?');
+
+    $language = $this->choice('Which language do you program in?', [
+        'PHP',
+        'Ruby',
+        'Python',
+    ]);
+
+    $this->line('Your name is '.$name.' and you program in '.$language.'.');
+});
+You may test this command with the following test which utilizes the expectsQuestion,  expectsOutput, and assertExitCode methods:
+
+/**
+ * Test a console command.
+ *
+ * @return void
+ */
+public function test_console_command()
+{
+    $this->artisan('question')
+         ->expectsQuestion('What is your name?', 'Taylor Otwell')
+         ->expectsQuestion('Which language do you program in?', 'PHP')
+         ->expectsOutput('Your name is Taylor Otwell and you program in PHP.')
+         ->assertExitCode(0);
+}
+URL Generator & Callable Syntax
+Instead of only accepting strings, Laravel's URL generator now accepts "callable" syntax when generating URLs to controller actions:
+
+action([UserController::class, 'index']);
+Paginator Links
+Laravel 5.7 allows you to control how many additional links are displayed on each side of the paginator's URL "window". By default, three links are displayed on each side of the primary paginator links. However, you may control this number using the onEachSide method:
+
+{{ $paginator->onEachSide(5)->links() }}
+Filesystem Read / Write Streams
+Laravel's Flysystem integration now offers readStream and writeStream methods:
+
+Storage::disk('s3')->writeStream(
+    'remote-file.zip',
+    Storage::disk('local')->readStream('local-file.zip')
+);
