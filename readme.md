@@ -18,4 +18,12 @@ Larvel 5.7 framework use for building a products manager system with auth login 
 1. Basic CRUD operation.
 2. Login with auth and password hashed.
 3. Laravel new features in directory structure for blade file.
-4. Using of v5.7 controller, model, route, bootstrap 4 and blade
+4. Using of v5.7 controller, model, route, bootstrap 4 and blade.
+
+## How to run
+
+git clone https://github.com/Quintus34/Lavarel-5.7-CRUD-with-login-sytem
+cd project directory
+composer install
+php artisan migrate
+php artisan serve
